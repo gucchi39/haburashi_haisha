@@ -8,15 +8,21 @@ import PatientDetail from './routes/PatientDetail';
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
-  const loadData = useClinicStore(state => state.loadData);
+  const { loadData, generateDemo } = useClinicStore();
 
   useEffect(() => {
     loadData();
     
+    // 初回アクセス時にダミーデータを自動生成
+    const hasData = localStorage.getItem('daisan-hygienist-lite-clinic-data');
+    if (!hasData) {
+      generateDemo();
+    }
+    
     // ダークモードの初期設定
     const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     setDarkMode(isDark);
-  }, [loadData]);
+  }, [loadData, generateDemo]);
 
   useEffect(() => {
     if (darkMode) {
