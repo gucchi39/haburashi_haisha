@@ -102,7 +102,6 @@ function calculateConsecutiveDays(logs: BrushLogExternal[]): number {
   let currentDate = new Date(uniqueDates[0]);
   
   for (const dateStr of uniqueDates) {
-    const logDate = new Date(dateStr);
     const expectedDateStr = currentDate.toISOString().split('T')[0];
     
     if (dateStr === expectedDateStr) {

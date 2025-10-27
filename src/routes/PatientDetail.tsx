@@ -30,7 +30,7 @@ ChartJS.register(
 
 export default function PatientDetail() {
   const { id } = useParams<{ id: string }>();
-  const { patients, logs, messages, updatePatient, getPatientLogs, getPatientMessages } = useClinicStore();
+  const { patients, updatePatient, getPatientLogs, getPatientMessages } = useClinicStore();
   const [followUpNote, setFollowUpNote] = useState('');
 
   const patient = patients.find(p => p.id === id);
@@ -79,7 +79,7 @@ export default function PatientDetail() {
     }
 
     return {
-      labels: dates.map(d => new Date(d).toLocaleDateString('ja-JP', { month: '1-digit', day: '1-digit' })),
+      labels: dates.map(d => new Date(d).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })),
       datasets: [
         {
           label: '所要時間（分）',

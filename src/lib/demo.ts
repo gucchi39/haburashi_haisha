@@ -44,7 +44,6 @@ export function generateDemoData(): ClinicBundle {
     patients.push(patient);
     
     // ログ生成（過去30日分）
-    const logCount = Math.floor(Math.random() * 30) + 10; // 10〜40日分のログ
     const adherenceRate = Math.random(); // 達成率のばらつき
     
     for (let day = 0; day < 30; day++) {
