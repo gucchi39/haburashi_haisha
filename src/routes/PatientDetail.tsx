@@ -30,12 +30,13 @@ ChartJS.register(
 
 export default function PatientDetail() {
   const { id } = useParams<{ id: string }>();
-  const { patients, updatePatient, getPatientLogs, getPatientMessages } = useClinicStore();
+  const { patients, updatePatient, getPatientLogs, getPatientMessages, getPatientConversations } = useClinicStore();
   const [followUpNote, setFollowUpNote] = useState('');
 
   const patient = patients.find(p => p.id === id);
   const patientLogs = useMemo(() => getPatientLogs(id || ''), [id, getPatientLogs]);
   const patientMessages = useMemo(() => getPatientMessages(id || ''), [id, getPatientMessages]);
+  const patientConversations = useMemo(() => getPatientConversations(id || ''), [id, getPatientConversations]);
   const metrics = useMemo(() => calculateMetrics(patientLogs, 30), [patientLogs]);
 
   if (!patient) {
@@ -290,6 +291,65 @@ export default function PatientDetail() {
                   {formatPercentage(metrics.sensitivityRate)}
                 </span>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* 仮想衛生士との会話履歴 */}
+        {patientConversations.length > 0 && (
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-6 mb-6 border border-purple-200 dark:border-purple-700">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                <span className="text-2xl mr-2">💬</span>
+                仮想衛生士との会話履歴
+              </h3>
+              {patientConversations.find(c => c.concern) && (
+                <span className="px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                  困りごと: {patientConversations.find(c => c.concern)?.concern}
+                </span>
+              )}
+            </div>
+            
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {patientConversations.map((conv) => (
+                <div
+                  key={conv.id}
+                  className={`flex ${conv.role === 'patient' ? 'justify-start' : 'justify-end'}`}
+                >
+                  <div className={`max-w-[80%] ${
+                    conv.role === 'patient'
+                      ? 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                      : 'bg-blue-500 dark:bg-blue-600 text-white'
+                  } rounded-lg p-4 shadow-sm`}>
+                    <div className="flex items-center mb-1">
+                      <span className="text-xs font-semibold">
+                        {conv.role === 'patient' ? '👤 患者さん' : '🦷 仮想衛生士'}
+                      </span>
+                      <span className={`text-xs ml-2 ${
+                        conv.role === 'patient' ? 'text-gray-500 dark:text-gray-400' : 'text-blue-100'
+                      }`}>
+                        {new Date(conv.timestamp).toLocaleString('ja-JP', {
+                          month: 'numeric',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </span>
+                    </div>
+                    <p className={`text-sm ${
+                      conv.role === 'patient' ? 'text-gray-700 dark:text-gray-300' : 'text-white'
+                    }`}>
+                      {conv.content}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+              <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                💡 <strong>衛生士メモ:</strong> 会話から患者さんの困りごとや悩みを把握し、次回の診療でフォローアップできます。
+              </p>
             </div>
           </div>
         )}

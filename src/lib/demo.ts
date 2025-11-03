@@ -1,8 +1,9 @@
-import { Patient, BrushLogExternal, ClinicBundle } from '../types';
+import { Patient, BrushLogExternal, ClinicBundle, ConversationMessage } from '../types';
 
 export function generateDemoData(): ClinicBundle {
   const patients: Patient[] = [];
   const logs: BrushLogExternal[] = [];
+  const conversations: ConversationMessage[] = [];
   
   const names = [
     { name: '山田太郎', sex: 'M' as const },
@@ -88,10 +89,83 @@ export function generateDemoData(): ClinicBundle {
     }
   });
   
+  // 会話履歴の生成（ランダムに数名の患者に会話を追加）
+  const conversationTemplates = [
+    {
+      concern: '出血',
+      messages: [
+        { role: 'patient' as const, content: '歯磨きすると毎回血が出るんですが、大丈夫でしょうか？' },
+        { role: 'assistant' as const, content: '歯茎からの出血は歯周病の初期症状の可能性があります。優しくブラッシングを続けることで改善することが多いです。2週間続けても改善しない場合は、歯科医院を受診することをおすすめします。' },
+        { role: 'patient' as const, content: 'わかりました。力を入れすぎていたかもしれません。' },
+      ]
+    },
+    {
+      concern: '時間不足',
+      messages: [
+        { role: 'patient' as const, content: '朝は時間がなくて、1分くらいしか磨けません。' },
+        { role: 'assistant' as const, content: '朝の時間がない気持ち、よくわかります。短時間でも効果的に磨くコツは、奥歯の奥側を重点的にすることです。また、夜は3分以上かけて丁寧に磨くことで、トータルでバランスを取ることができますよ。' },
+        { role: 'patient' as const, content: '夜はもう少し時間をかけてみます！' },
+      ]
+    },
+    {
+      concern: 'モチベーション',
+      messages: [
+        { role: 'patient' as const, content: '最近、歯磨きをサボりがちです。やる気が出ません。' },
+        { role: 'assistant' as const, content: 'モチベーションが下がることは誰にでもあります。小さな目標から始めてみませんか？例えば「夜だけは必ず2分磨く」など。達成できたら自分を褒めてあげてください。継続は力なりです！' },
+        { role: 'patient' as const, content: 'まずは夜だけでも頑張ってみます。' },
+      ]
+    },
+    {
+      concern: '痛み',
+      messages: [
+        { role: 'patient' as const, content: '右下の奥歯が磨くとしみて痛いです。' },
+        { role: 'assistant' as const, content: '知覚過敏の可能性があります。柔らかめの歯ブラシで優しく磨いてみてください。また、冷たいものを避けることも効果的です。痛みが続く場合は、早めに歯科医院を受診してくださいね。' },
+        { role: 'patient' as const, content: '柔らかい歯ブラシに変えてみます。ありがとうございます。' },
+      ]
+    },
+    {
+      concern: 'テクニック',
+      messages: [
+        { role: 'patient' as const, content: '正しい磨き方がわからないです。' },
+        { role: 'assistant' as const, content: '基本は「歯ブラシを45度に傾けて、歯と歯茎の境目を優しく磨く」ことです。力は入れすぎず、小刻みに動かすのがコツです。鏡を見ながら1本1本丁寧に磨いてみてください。' },
+        { role: 'patient' as const, content: '鏡を見ながらやってみます！' },
+      ]
+    },
+  ];
+
+  // ランダムに5〜7名の患者に会話を追加
+  const conversationCount = Math.floor(Math.random() * 3) + 5;
+  const shuffledPatients = [...patients].sort(() => Math.random() - 0.5);
+  
+  for (let i = 0; i < Math.min(conversationCount, patients.length); i++) {
+    const patient = shuffledPatients[i];
+    const template = conversationTemplates[Math.floor(Math.random() * conversationTemplates.length)];
+    
+    // 過去1〜7日以内のランダムな日時
+    const daysAgo = Math.floor(Math.random() * 7);
+    const baseDate = new Date();
+    baseDate.setDate(baseDate.getDate() - daysAgo);
+    
+    template.messages.forEach((msg, idx) => {
+      const timestamp = new Date(baseDate);
+      timestamp.setMinutes(timestamp.getMinutes() + idx * 2); // 2分間隔で会話
+      
+      conversations.push({
+        id: `conv-${patient.id}-${idx}`,
+        patientId: patient.id,
+        timestamp: timestamp.toISOString(),
+        role: msg.role,
+        content: msg.content,
+        concern: msg.role === 'patient' && idx === 0 ? template.concern : undefined,
+      });
+    });
+  }
+
   return {
     patients,
     logs,
     messages: [],
+    conversations,
     version: 'daisan-hygienist-lite-v1',
   };
 }

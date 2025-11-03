@@ -33,10 +33,20 @@ export type MessageSummary = {
   summary: string;
 };
 
+export type ConversationMessage = {
+  id: string;
+  patientId: string;
+  timestamp: string;
+  role: 'patient' | 'assistant';
+  content: string;
+  concern?: string; // 困りごとカテゴリ: '出血', '痛み', '時間不足', 'モチベーション', etc.
+};
+
 export type ClinicBundle = {
   patients: Patient[];
   logs: BrushLogExternal[];
   messages?: MessageSummary[];
+  conversations?: ConversationMessage[];
   version: 'daisan-hygienist-lite-v1';
 };
 

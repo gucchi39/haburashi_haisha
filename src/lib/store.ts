@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Patient, BrushLogExternal, MessageSummary, ClinicBundle } from '../types';
+import { Patient, BrushLogExternal, MessageSummary, ClinicBundle, ConversationMessage } from '../types';
 import { loadClinicData, saveClinicData } from './storage';
 import { generateDemoData } from './demo';
 
@@ -7,6 +7,7 @@ interface ClinicStore {
   patients: Patient[];
   logs: BrushLogExternal[];
   messages: MessageSummary[];
+  conversations: ConversationMessage[];
   
   loadData: () => void;
   saveData: () => void;
@@ -20,12 +21,14 @@ interface ClinicStore {
   
   getPatientLogs: (patientId: string) => BrushLogExternal[];
   getPatientMessages: (patientId: string) => MessageSummary[];
+  getPatientConversations: (patientId: string) => ConversationMessage[];
 }
 
 export const useClinicStore = create<ClinicStore>((set, get) => ({
   patients: [],
   logs: [],
   messages: [],
+  conversations: [],
   
   loadData: () => {
     const data = loadClinicData();
@@ -34,6 +37,7 @@ export const useClinicStore = create<ClinicStore>((set, get) => ({
         patients: data.patients,
         logs: data.logs,
         messages: data.messages || [],
+        conversations: data.conversations || [],
       });
     }
   },
@@ -44,6 +48,7 @@ export const useClinicStore = create<ClinicStore>((set, get) => ({
       patients: state.patients,
       logs: state.logs,
       messages: state.messages,
+      conversations: state.conversations,
       version: 'daisan-hygienist-lite-v1',
     };
     saveClinicData(bundle);
@@ -55,6 +60,7 @@ export const useClinicStore = create<ClinicStore>((set, get) => ({
       patients: demoData.patients,
       logs: demoData.logs,
       messages: demoData.messages || [],
+      conversations: demoData.conversations || [],
     });
     get().saveData();
   },
@@ -64,6 +70,7 @@ export const useClinicStore = create<ClinicStore>((set, get) => ({
       patients: data.patients,
       logs: data.logs,
       messages: data.messages || [],
+      conversations: data.conversations || [],
     });
     get().saveData();
   },
@@ -74,6 +81,7 @@ export const useClinicStore = create<ClinicStore>((set, get) => ({
       patients: state.patients,
       logs: state.logs,
       messages: state.messages,
+      conversations: state.conversations,
       version: 'daisan-hygienist-lite-v1',
     };
   },
@@ -99,6 +107,7 @@ export const useClinicStore = create<ClinicStore>((set, get) => ({
       patients: state.patients.filter(p => p.id !== id),
       logs: state.logs.filter(l => l.patientId !== id),
       messages: state.messages.filter(m => m.patientId !== id),
+      conversations: state.conversations.filter(c => c.patientId !== id),
     }));
     get().saveData();
   },
@@ -109,5 +118,10 @@ export const useClinicStore = create<ClinicStore>((set, get) => ({
   
   getPatientMessages: (patientId: string) => {
     return get().messages.filter(msg => msg.patientId === patientId);
+  },
+  
+  getPatientConversations: (patientId: string) => {
+    return get().conversations.filter(conv => conv.patientId === patientId)
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   },
 }));
