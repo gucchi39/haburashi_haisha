@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useClinicStore } from '../lib/store';
 import { calculateMetrics, getLast7DaysAchievementRate } from '../lib/metrics';
 
@@ -9,6 +9,7 @@ type FilterType = 'all' | 'noLogs' | 'lowAchievement' | 'followUp';
 
 export default function Patients() {
   const { patients, logs } = useClinicStore();
+  const navigate = useNavigate();
   const [sortKey, setSortKey] = useState<SortKey>('name');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const [filter, setFilter] = useState<FilterType>('all');
@@ -217,7 +218,7 @@ export default function Patients() {
                 <tr
                   key={patient.id}
                   className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                  onClick={() => window.location.href = `/patients/${patient.id}`}
+                  onClick={() => navigate(`/patients/${patient.id}`)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900 dark:text-white">
